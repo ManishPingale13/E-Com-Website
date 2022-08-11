@@ -5,19 +5,22 @@ from math import ceil
 
 
 def index(request):
-    fetchedProducts = Product.objects.all()
-    n = len(fetchedProducts)
-    nSlides = n//4 + ceil((n/4)-(n//4))
+    allProds = []
+    catProds = Product.objects.values('category', 'id')
+    cats = {item['category'] for item in catProds}
+    for cat in cats:
+        prod = Product.objects.filter(category=cat)
+        n = len(prod)
+        nSlides = n//4 + ceil((n/4)-(n//4))
+        allProds.append([prod, range(1, nSlides), nSlides])
     params = {
-        "noOfSlides": nSlides,
-        'range': range(1,nSlides),
-        "products": fetchedProducts
+        'allProds': allProds,
     }
     return render(request, 'shop/index.html', params)
 
 
 def search(request):
-    return HttpResponse("At Search")
+    return render(request, 'shop/search.html')
 
 
 def about(request):
@@ -25,16 +28,16 @@ def about(request):
 
 
 def contact(request):
-    return HttpResponse("At Contact")
+    return render(request, 'shop/contact.html')
 
 
 def productView(request):
-    return HttpResponse("At Product View")
+    return render(request, 'shop/prodview.html')
 
 
 def tracker(request):
-    return HttpResponse("At Tracker")
+    return render(request, 'shop/tracker.html')
 
 
 def checkout(request):
-    return HttpResponse("At Checkout")
+    return render(request, 'shop/checkout.html')
