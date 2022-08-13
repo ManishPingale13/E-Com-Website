@@ -80,7 +80,6 @@ padding-right: 0; } {% endblock %} {% block body %} {% load static %}
 </div>
 {% endblock %} {% block js %}
 <script>
-    console.log("working");
     if (localStorage.getItem("cart") == null) {
       var cart = {};
     } else {
@@ -90,13 +89,15 @@ padding-right: 0; } {% endblock %} {% block body %} {% load static %}
       cartNumber(cart);
     }
 
-    $('.divpr').on('click','button.cart',function(){ console.log("clicked");
+    $('.divpr').on('click','button.cart',function(){
     var idstr = this.id.toString();
-    console.log(idstr);
     if (cart[idstr] != undefined) {
-      cart[idstr] = cart[idstr] + 1;
+      qty=cart[idstr][0] + 1; 
+
     } else {
-      cart[idstr] = 1;
+      qty=  1;
+      name = document.getElementById('name'+idstr).innerHTML.trim();
+      cart[idstr] = [qty,name];
     }
     updateCart(cart);
   });
@@ -105,19 +106,17 @@ padding-right: 0; } {% endblock %} {% block body %} {% load static %}
 
     function cartNumber() {
       count = 0;
-      for (item in cart) count += cart[item];
+      for (item in cart) count += cart[item][0];
       document.getElementById("cart").innerHTML = count;
     }
 
     function updatePopover(cart) {
-      console.log('In popover');
       var popStr = "";
       popStr += "<h5>Items in cart</h5> <div class=' mx-2 my-2'>";
       var i = 1;
       for (item in cart) {
         popStr += "<b> " + i + "</b>. ";
-        console.log(document.getElementById("name"+item).innerHTML);
-        popStr += document.getElementById("name"+item).innerHTML+" Qty: "+ cart[item]+"<br>";
+        popStr += document.getElementById("name"+item).innerHTML+" Qty: "+ cart[item][0]+"<br>";
         i++;
       }
       popStr += "</div> <a href='/shop/checkout'> <button class='btn btn-primary' id='clearcart'>Checkout</button> </a> <button class='btn btn-primary' onclick='clearCart()' id='checkout'>Clear cart</button>";
@@ -157,7 +156,7 @@ padding-right: 0; } {% endblock %} {% block body %} {% load static %}
           "' class='btn btn-primary minus'>-</button> <span id='val" +
           item +
           "''>" +
-          cart[item] +
+          cart[item][0] +
           "</span> <button id='plus" +
           item +
           "' class='btn btn-primary plus'> + </button>";
@@ -169,16 +168,16 @@ padding-right: 0; } {% endblock %} {% block body %} {% load static %}
 
     $(".divpr").on("click", "button.minus", function () {
       a = this.id.slice(7);
-      cart["pr" + a] -= 1;
-      cart["pr" + a] = Math.max(0, cart["pr" + a]);
-      document.getElementById("valpr" + a).innerHTML = cart["pr" + a];
+      cart["pr" + a][0] -= 1;
+      cart["pr" + a][0] = Math.max(0, cart["pr" + a][0]);
+      document.getElementById("valpr" + a).innerHTML = cart["pr" + a][0];
       updateCart(cart);
     });
 
     $(".divpr").on("click", "button.plus", function () {
       a = this.id.slice(6);
-      cart["pr" + a] += 1;
-      document.getElementById("valpr" + a).innerHTML = cart["pr" + a];
+      cart["pr" + a][0] += 1;
+      document.getElementById("valpr" + a).innerHTML = cart["pr" + a][0];
       updateCart(cart);
     });
 </script>
