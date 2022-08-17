@@ -20,24 +20,26 @@ def index(request):
     }
     return render(request, 'shop/index.html', params)
 
-def searchMatch(query,item):
+
+def searchMatch(query, item):
     if query in item.desc.lower() or query in item.productName.lower() or query in item.category.lower():
         return True
     else:
         return False
 
+
 def search(request):
-    query=request.GET.get('search').lower()
+    query = request.GET.get('search').lower()
     allProds = []
     catProds = Product.objects.values('category', 'id')
     cats = {item['category'] for item in catProds}
     for cat in cats:
         prodtemp = Product.objects.filter(category=cat)
-        prod = [item for item in prodtemp if searchMatch(query,item)]
-        print(query,prod)
+        prod = [item for item in prodtemp if searchMatch(query, item)]
+        print(query, prod)
         n = len(prod)
         nSlides = n//4 + ceil((n/4)-(n//4))
-        if len(prod)!=0:
+        if len(prod) != 0:
             allProds.append([prod, range(1, nSlides), nSlides])
     params = {
         'allProds': allProds,
@@ -80,12 +82,12 @@ def tracker(request):
                     updates.append(
                         {'text': item.update_desc, 'time': item.timestamp})
                     response = json.dumps(
-                        [updates, order[0].items_json], default=str)
+                        {"status": "Success", "updates": updates, "itemsJson": order[0].items_json}, default=str)
                 return HttpResponse(response)
             else:
-                return HttpResponse('{}')
+                return HttpResponse('{"status": "No Item"}')
         except Exception as e:
-            return HttpResponse('{}')
+            return HttpResponse('{"status": "Error"}')
 
     return render(request, 'shop/tracker.html')
 
