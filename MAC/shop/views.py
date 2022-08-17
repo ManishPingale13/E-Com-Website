@@ -20,9 +20,29 @@ def index(request):
     }
     return render(request, 'shop/index.html', params)
 
+def searchMatch(query,item):
+    if query in item.desc.lower() or query in item.productName.lower() or query in item.category.lower():
+        return True
+    else:
+        return False
 
 def search(request):
-    return render(request, 'shop/search.html')
+    query=request.GET.get('search').lower()
+    allProds = []
+    catProds = Product.objects.values('category', 'id')
+    cats = {item['category'] for item in catProds}
+    for cat in cats:
+        prodtemp = Product.objects.filter(category=cat)
+        prod = [item for item in prodtemp if searchMatch(query,item)]
+        print(query,prod)
+        n = len(prod)
+        nSlides = n//4 + ceil((n/4)-(n//4))
+        if len(prod)!=0:
+            allProds.append([prod, range(1, nSlides), nSlides])
+    params = {
+        'allProds': allProds,
+    }
+    return render(request, 'shop/search.html', params)
 
 
 def about(request):
@@ -59,7 +79,8 @@ def tracker(request):
                 for item in update:
                     updates.append(
                         {'text': item.update_desc, 'time': item.timestamp})
-                    response = json.dumps([updates,order[0].items_json], default=str)
+                    response = json.dumps(
+                        [updates, order[0].items_json], default=str)
                 return HttpResponse(response)
             else:
                 return HttpResponse('{}')
@@ -82,7 +103,7 @@ def checkout(request):
         zip_code = request.POST.get('zip_code', '')
         phone = request.POST.get('phone', '')
         order = Order(items_json=items_json, name=name, email=email, address=address, city=city,
-                      state=state, zip_code=zip_code, phone=phone,amount=amount)
+                      state=state, zip_code=zip_code, phone=phone, amount=amount)
         order.save()
         update = OrderUpdate(order_id=order.order_id,
                              update_desc="The order has been placed")
